@@ -23,6 +23,7 @@ gem 'pdfkit', '~> 0.8.2'
 gem "paperclip", "~> 4.3"
 gem 'dalli'
 gem 'gravtastic', '~> 3.2.6'
+gem 'doorkeeper'
 
 
 gem 'pghero'
