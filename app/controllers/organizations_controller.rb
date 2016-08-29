@@ -77,12 +77,17 @@ class OrganizationsController < ApplicationController
 
   def percent_completed_hash(courses, user)
     percent_completed = {}
-    all_awarded = user.awarded_points.map(&:course_id)
-    all_available = AvailablePoint.courses_points(courses).map(&:course_id)
+    awarded_points = Hash[user.awarded_points.to_a.sort!.group_by(&:course_id).map { |k, v| [k, v.map(&:name)] }]
     courses.each do |course|
-      awarded = all_awarded.select { |id| id == course.id }.length.to_f
-      available = all_available.select { |id| id == course.id }.length.to_f
-      percent_completed[course.id] = 100 * (awarded / available)
+      if course.visible_to?(current_user)
+        awarded = awarded_points[course.id]
+        missing = AvailablePoint.course_points(course).order!.map(&:name) - awarded
+        if awarded.size + missing.size > 0
+          percent_completed[course.id] = 100 * (awarded.size.to_f / (awarded.size + missing.size))
+        else
+          percent_completed[course.id] = 0
+        end
+      end
     end
     percent_completed
   end
